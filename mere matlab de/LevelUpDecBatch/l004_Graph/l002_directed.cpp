@@ -54,6 +54,7 @@ void topologicalOrder_DFS()
 {
     vector<bool> vis(N, false);
     vector<int> ans;
+    
     for (int i = 0; i < N; i++)
     {
         if (!vis[i])
