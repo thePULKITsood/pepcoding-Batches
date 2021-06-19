@@ -602,6 +602,7 @@ public int[] findOrder(int N, int[][] arr) {
 int[] findRedundantConnection(int[][] edges){
     int n = edges.length;
     par = new int[n+1];
+    //         these are n+ 1 as we are using 1 indxed nodes 
     for (int i = 0; i <= n; i++)
         par[i] = i;
 
@@ -818,3 +819,145 @@ int[] findRedundantConnection(int[][] edges){
 
 
 
+    public boolean canFinish(int N, int[][] arr){
+        ArrayList<Integer>[] graph = new ArrayList[N];
+        for(int i=0;i<N;i++) graph[i] = new ArrayList<>();
+        
+        int[] indegree = new int[N];
+        for(int[] a: arr){
+            indegree[a[1]]++;
+            graph[a[0]].add(a[1]);
+        }
+        
+        LinkedList<Integer> que = new LinkedList<>();
+        for(int i=0;i<N;i++) if(indegree[i]==0) que.addLast(i);
+    
+        int count = 0;
+        while(que.size()!=0){
+            int vtx = que.removeFirst();
+            count++;
+            for(int e : graph[vtx]){
+                if(--indegree[e] == 0) que.addLast(e);
+            }
+        }
+        
+        
+        return count == N;        
+    }
+    
+    
+    //Leetcode 210
+    public int[] findOrder(int N, int[][] arr) {
+        ArrayList<Integer>[] graph = new ArrayList[N];
+         for(int i=0;i<N;i++) graph[i] = new ArrayList<>();
+         
+         int[] indegree = new int[N];
+         for(int[] a: arr){
+             indegree[a[1]]++;
+             graph[a[0]].add(a[1]);
+         }
+         
+         LinkedList<Integer> que = new LinkedList<>();
+         for(int i=0;i<N;i++) if(indegree[i]==0) que.addLast(i);
+    
+         int[] ans = new int[N];
+         int idx = N - 1;
+         while(que.size()!=0){
+             int vtx = que.removeFirst();
+             ans[idx--] = vtx;
+             
+             for(int e : graph[vtx]){
+                 if(--indegree[e] == 0) que.addLast(e);
+             }
+         }
+         
+         
+         if(idx == -1) return ans;
+         return new int[0];
+     }
+    
+     public int numBusesToDestination(int[][] routes, int src, int desti) {
+         if(src == desti) return 0;
+         int n = routes.length;
+    
+         // unorderd_map<int,vector<int>> map;
+         HashMap<Integer,ArrayList<Integer>> busStandsMap = new HashMap<>();
+         for(int busNo = 0;busNo < n;busNo++){
+             for(int stand : routes[busNo]){
+                 busStandsMap.putIfAbsent(stand,new ArrayList<>());
+                 busStandsMap.get(stand).add(busNo);
+             }
+         }
+    
+         LinkedList<Integer> que = new LinkedList<>();
+         HashSet<Integer> busStandVis = new HashSet<>();
+         boolean[] busNoVis = new boolean[n];
+    
+    
+         que.addLast(src);
+         busStandVis.add(src);
+    
+         int level = 0;
+         while(que.size()!=0){
+            int size = que.size();
+            
+            while(size-->0){
+                int busStand = que.removeFirst();
+                for(int busNo : busStandsMap.get(busStand)){
+                    if(busNoVis[busNo]) continue;
+                    
+                    busNoVis[busNo] = true;
+                    for(int stand : routes[busNo]){
+                        if(busStandVis.contains(stand)) continue;
+                        busStandVis.add(stand);
+                        que.addLast(stand);
+                        if(stand == desti) return level + 1; 
+                    }
+                }
+            }
+            level++;
+         }
+    
+         return level;
+     }
+    
+     HashSet<String> map = new HashSet<>();
+        int[][] dir = {{0,1},{1,0},{0,-1},{-1,0}};
+        char[] dirS = {'r','d','l','u'};
+        String shape = "";
+        int n=0,m=0;
+        
+        public void dfs(int i,int j,int[][] grid){
+            
+            grid[i][j] = 0;
+            for(int d = 0;d<4;d++){
+                int r = i + dir[d][0];
+                int c = j + dir[d][1];
+                
+                if(r>=0 && c>=0 && r< n && c<m && grid[r][c] == 1){
+                    shape += dirS[d];
+                    dfs(r,c,grid);
+                    shape += "b";
+                }
+            }
+             
+        }
+        
+        public int numDistinctIslands(int[][] grid) {
+            if(grid.length ==0 || grid[0].length == 0) return 0;
+            n = grid.length;
+            m = grid[0].length;
+            for(int i=0;i<n;i++){
+                for(int j =0;j<m;j++){
+                    if(grid[i][j]==1){
+                        dfs(i,j,grid);
+                        map.add(shape);
+                        shape = "";
+                    }
+                }
+            }
+            
+            return map.size();
+            
+        }
+    

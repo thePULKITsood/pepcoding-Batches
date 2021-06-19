@@ -38,7 +38,9 @@ void display(vector<vector<Edge>> &graph, int N)
 }
 
 //Union Find.=========================================================================
-
+// with Path Cpmpression : alpha(n) <= 4, Inverse Akermann Function
+    // without path compression : O(logn)
+    
 vector<int> par;
 vector<int> size;
 

@@ -25,9 +25,7 @@ public class l002_Directional{
     // Using DFS.==========================================
 
     public static void TopoDFS(int src,boolean[] vis,ArrayList<Integer> ans){
-        
         vis[src] = true;
-        
         for(Integer e : graph[src]){
             if(!vis[e])
                TopoDFS(e,vis,ans);

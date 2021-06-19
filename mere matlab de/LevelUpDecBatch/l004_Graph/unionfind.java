@@ -28,6 +28,7 @@ public class unionfind {
         }
     }
 
+    
     static int[] par;
     static int[] size;
 
