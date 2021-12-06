@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class BinaryTree {
     public static class Node {
@@ -258,6 +260,316 @@ public class BinaryTree {
         }
 
         return -1;
+    }
+
+    static Node prev = null;
+
+    public static boolean isBST(Node node) {
+        if (node == null)
+            return true;
+
+        if (!isBST(node.left))
+            return false;
+
+        if (prev != null && prev.data > node.data)
+            return false;
+        prev = node;
+
+        if (!isBST(node.right))
+            return false;
+        return true;
+    }
+
+    public static class isBSTPair {
+        boolean isBST = true;
+        int maxEle = -(int) 1e9;
+        int minEle = (int) 1e9;
+    }
+
+    public static isBSTPair isBST_02(Node node) {
+        if (node == null)
+            return new isBSTPair();
+
+        isBSTPair left = isBST_02(node.left);
+        if (!left.isBST)
+            return left;
+
+        isBSTPair right = isBST_02(node.right);
+        if (!right.isBST)
+            return right;
+
+        isBSTPair self = new isBSTPair();
+        self.isBST = false;
+
+        if (left.maxEle < node.data && right.minEle > node.data) {
+            self.maxEle = Math.max(right.maxEle, node.data);
+            self.minEle = Math.min(left.minEle, node.data);
+            self.isBST = true;
+        }
+
+        return self;
+    }
+
+    public static boolean isBal(Node node) {
+        if (node == null)
+            return true;
+
+        if (!isBal(node.left))
+            return false;
+        if (!isBal(node.right))
+            return false;
+
+        int lh = height(node.left);
+        int rh = height(node.right);
+
+        int diff = Math.abs(lh - rh);
+
+        if (diff > 1)
+            return false;
+
+        return true;
+    }
+
+    public static class balPair {
+        int height = -1;
+        boolean isBal = true;
+    }
+
+    public static balPair isBal2(Node node) {
+        if (node == null)
+            return new balPair();
+
+        balPair lPair = isBal2(node.left);
+        if (!lPair.isBal)
+            return lPair;
+
+        balPair rPair = isBal2(node.right);
+        if (!rPair.isBal)
+            return rPair;
+
+        balPair myAns = new balPair();
+        if (Math.abs(lPair.height - rPair.height) > 1) {
+            myAns.isBal = false;
+            return myAns;
+        }
+
+        myAns.height = Math.max(lPair.height, rPair.height) + 1;
+        return myAns;
+    }
+
+    public int isBal3(Node node) {
+        if (node == null)
+            return -1;
+
+        int lh = isBal3(node.left);
+        if (lh == -2)
+            return lh;
+
+        int rh = isBal3(node.right);
+        if (rh == -2)
+            return rh;
+
+        if (Math.abs(lh - rh) > 1) {
+            return -2;
+        }
+
+        return Math.max(lh, rh) + 1;
+    }
+
+    public boolean isBalanced(Node root) {
+
+        int ans = isBal3(root);
+        return ans != -2 ? true : false;
+    }
+
+    public static class tiltPair {
+        int tiltSF = 0;
+        int sum = 0;
+    }
+
+    public tiltPair findTilt(TreeNode root) {
+        if (root == null)
+            return new tiltPair();
+
+        tiltPair left = findTilt(root.left);
+        tiltPair right = findTilt(root.right);
+
+        tiltPair myAns = new tiltPair();
+
+        myAns.tiltSF = left.tiltSF + right.tiltSF + Math.abs(left.sum - right.sum);
+        myAns.sum = left.sum + right.sum + root.val;
+        return myAns;
+    }
+
+    // {tiltSF,sum}
+    public int[] findTilt2(TreeNode root) {
+        if (root == null)
+            return new int[2];
+
+        int[] left = findTilt2(root.left);
+        int[] right = findTilt2(root.right);
+
+        int[] myAns = new int[2];
+        myAns[0] = left[0] + right[0] + Math.abs(left[1] - right[1]);
+        myAns[1] = left[1] + right[1] + root.val;
+        return myAns;
+    }
+
+    public int diameterOfBinaryTree_(TreeNode root) {
+        if (root == null)
+            return 0;
+
+        int ld = diameterOfBinaryTree_(root.left);
+        int rd = diameterOfBinaryTree_(root.right);
+
+        int lh = height(root.left);
+        int rh = height(root.right);
+
+        return Math.max(Math.max(ld, rd), lh + rh + 2);
+    }
+
+    // {diameter, height}
+    public int[] diameterOfBinaryTree_02(TreeNode root) {
+        if (root == null)
+            return new int[] { 0, -1 };
+
+        int[] ld = diameterOfBinaryTree_02(root.left);
+        int[] rd = diameterOfBinaryTree_02(root.right);
+
+        int[] myAns = new int[2];
+        myAns[0] = Math.max(Math.max(ld[0], rd[0]), ld[1] + rd[1] + 2);
+        myAns[1] = Math.max(ld[1], rd[1]) + 1;
+
+        return myAns;
+    }
+
+    int diameter = 0;
+
+    public int diameterOfBinaryTree_03(TreeNode root) {
+        if (root == null)
+            return -1;
+
+        int ld = diameterOfBinaryTree_03(root.left);
+        int rd = diameterOfBinaryTree_03(root.right);
+
+        diameter = Math.max(diameter, ld + rd + 2);
+        return Math.max(ld, rd) + 1;
+    }
+
+    public static class lBSTPair {
+        boolean isBST = true;
+        int max = -(int) 1e9;
+        int min = (int) 1e9;
+
+        int MaxSize = 0;
+        Node MaxBSTNode = null;
+    }
+
+    public static lBSTPair largestBST(Node node) {
+        if (node == null)
+            return new lBSTPair();
+
+        lBSTPair left = largestBST(node.left);
+        lBSTPair right = largestBST(node.right);
+
+        lBSTPair myAns = new lBSTPair();
+        if (left.isBST && right.isBST && left.max < node.data && node.data < right.min) {
+            myAns.isBST = true;
+            myAns.min = Math.min(left.min, node.data);
+            myAns.max = Math.max(right.max, node.data);
+
+            myAns.MaxSize = left.MaxSize + right.MaxSize + 1;
+            myAns.MaxBSTNode = node;
+        } else {
+            myAns.isBST = false;
+            myAns.MaxSize = Math.max(left.MaxSize, right.MaxSize);
+            myAns.MaxBSTNode = left.MaxSize > right.MaxSize ? left.MaxBSTNode : right.MaxBSTNode;
+        }
+
+        return myAns;
+    }
+
+    public Node lowestCommonAncestor(Node root, int p, int q) {
+        ArrayList<Node> list1 = nodeToRootPath(root, p);
+        ArrayList<Node> list2 = nodeToRootPath(root, q);
+
+        int i = list1.size() - 1;
+        int j = list2.size() - 1;
+
+        Node LCA = null;
+        while (i >= 0 && j >= 0) {
+            if (list1.get(i) != list2.get(j))
+                break;
+            LCA = list2.get(j);
+            i--;
+            j--;
+
+        }
+
+        return LCA;
+    }
+
+    public static void levelOrder(Node root) {
+        LinkedList<Node> que = new LinkedList<>(); // removeFirst, addLast
+        que.addLast(root);
+        int level = 0;
+
+        while (que.size() != 0) {
+            int size = que.size(); // size of current level
+            while (size-- > 0) {
+                Node rn = que.removeFirst();
+                System.out.print(rn.data + " ");
+
+                if (rn.left != null)
+                    que.addLast(rn.left);
+                if (rn.right != null)
+                    que.addLast(rn.right);
+            }
+
+            level++;
+            System.out.println();
+        }
+
+    }
+
+    public List<List<Integer>> zigZag(Node root) {
+        List<List<Integer>> ans = new ArrayList<>();
+        if (root == null)
+            return ans;
+        LinkedList<Node> que = new LinkedList<>(); // removeFirst, addLast
+        LinkedList<Node> st = new LinkedList<>(); // removeFirst, addFirst
+
+        que.addLast(root);
+        int level = 0;
+
+        while (que.size() != 0) {
+            int size = que.size();
+            List<Integer> smallAns = new ArrayList<>();
+            while (size-- > 0) {
+                Node rn = que.removeFirst();
+                smallAns.add(rn.data);
+
+                if (level % 2 == 0) {
+                    if (rn.left != null)
+                        st.addFirst(rn.left);
+                    if (rn.right != null)
+                        st.addFirst(rn.right);
+                } else {
+                    if (rn.right != null)
+                        st.addFirst(rn.right);
+                    if (rn.left != null)
+                        st.addFirst(rn.left);
+                }
+            }
+            level++;
+            ans.add(smallAns);
+            LinkedList<Node> temp = que;
+            que = st;
+            st = temp;
+        }
+
+        return ans;
+
     }
 
 }

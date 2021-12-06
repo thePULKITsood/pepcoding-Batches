@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 public class l001 {
 
@@ -274,8 +276,504 @@ public class l001 {
 
     // LCA===================================================================
 
-    public TreeNode lowestCommonAncestor(TreeNode root, int p, int q) {
+    TreeNode LCA = null;
 
+    public boolean lowestCommonAncestor_(TreeNode node, TreeNode p, TreeNode q) {
+        if (node == null)
+            return false;
+
+        boolean self = false;
+        if (node == p || node == q)
+            self = true;
+
+        boolean left = lowestCommonAncestor_(node.left, p, q);
+        boolean right = lowestCommonAncestor_(node.right, p, q);
+
+        if ((left && right) || (left && self) || (right && self))
+            LCA = node;
+
+        return left || right || self;
     }
 
+    public TreeNode lowestCommonAncestor(TreeNode node, TreeNode p, TreeNode q) {
+        lowestCommonAncestor_(node, p, q);
+        return LCA;
+    }
+
+    public static void levelOrder(TreeNode root) {
+        LinkedList<TreeNode> que = new LinkedList<>();
+        que.addLast(root);
+
+        ArrayList<ArrayList<Integer>> ans = new ArrayList<>();
+        int level = 0;
+        while (que.size() != 0) {
+            int size = que.size();
+            ArrayList<Integer> smallAns = new ArrayList<>();
+            System.out.println(level);
+            while (size-- > 0) {
+                TreeNode rnode = que.removeFirst();
+                smallAns.add(rnode.val);
+
+                if (rnode.left != null)
+                    que.addLast(rnode.left);
+                if (rnode.right != null)
+                    que.addLast(rnode.right);
+            }
+            ans.add(smallAns);
+            level++;
+        }
+
+        int count = 0;
+        for (var list : ans) {
+            System.out.println(count++ + " -> " + list);
+        }
+    }
+
+    public static List<Integer> leftView(TreeNode root) {
+        LinkedList<TreeNode> que = new LinkedList<>();
+        que.addLast(root);
+
+        List<Integer> ans = new ArrayList<>();
+        while (que.size() != 0) {
+
+            int size = que.size();
+            ans.add(que.getFirst().val);
+            while (size-- > 0) {
+                TreeNode rnode = que.removeFirst();
+
+                if (rnode.left != null)
+                    que.addLast(rnode.left);
+                if (rnode.right != null)
+                    que.addLast(rnode.right);
+            }
+        }
+
+        return ans;
+    }
+
+    public static List<Integer> rightView(TreeNode root) {
+        LinkedList<TreeNode> que = new LinkedList<>();
+        que.addLast(root);
+
+        List<Integer> ans = new ArrayList<>();
+        while (que.size() != 0) {
+
+            int size = que.size();
+            ans.add(que.getFirst().val);
+            while (size-- > 0) {
+                TreeNode rnode = que.removeFirst();
+
+                if (rnode.right != null)
+                    que.addLast(rnode.right);
+                if (rnode.left != null)
+                    que.addLast(rnode.left);
+            }
+        }
+
+        return ans;
+    }
+
+    public static void widthOfShadow(TreeNode node, int vl, int[] minMax) {
+        if (node == null)
+            return;
+        minMax[0] = Math.min(minMax[0], vl);
+        minMax[1] = Math.max(minMax[1], vl);
+        widthOfShadow(node.left, vl - 1, minMax);
+        widthOfShadow(node.right, vl + 1, minMax);
+    }
+
+    public static class vPair {
+        TreeNode node = null;
+        int vl = 0;
+        int level = 0;
+
+        vPair(TreeNode node, int vl) {
+            this(node, vl, 0);
+        }
+
+        vPair(TreeNode node, int vl, int level) {
+            this.vl = vl;
+            this.node = node;
+            this.level = level;
+        }
+    }
+
+    public static ArrayList<ArrayList<Integer>> verticalOrder(TreeNode root) {
+        LinkedList<vPair> que = new LinkedList<>();
+        int[] minMax = new int[2];
+        widthOfShadow(root, 0, minMax);
+        int len = minMax[1] - minMax[0] + 1;
+
+        que.addLast(new vPair(root, Math.abs(minMax[0])));
+
+        ArrayList<ArrayList<Integer>> ans = new ArrayList<>();
+        for (int i = 0; i < len; i++)
+            ans.add(new ArrayList<>());
+
+        while (que.size() != 0) {
+            int size = que.size();
+            while (size-- > 0) {
+                vPair rp = que.removeFirst();
+                int vl = rp.vl;
+                TreeNode node = rp.node;
+
+                ans.get(vl).add(node.val);
+
+                if (node.left != null)
+                    que.addLast(new vPair(node.left, vl - 1));
+                if (node.right != null)
+                    que.addLast(new vPair(node.right, vl + 1));
+            }
+        }
+
+        return ans;
+    }
+
+    public static ArrayList<Integer> bottomView(TreeNode root) {
+        LinkedList<vPair> que = new LinkedList<>();
+        int[] minMax = new int[2];
+        widthOfShadow(root, 0, minMax);
+        int len = minMax[1] - minMax[0] + 1;
+
+        que.addLast(new vPair(root, Math.abs(minMax[0])));
+
+        ArrayList<Integer> ans = new ArrayList<>();
+        for (int i = 0; i < len; i++)
+            ans.add(null);
+
+        while (que.size() != 0) {
+            int size = que.size();
+            while (size-- > 0) {
+                vPair rp = que.removeFirst();
+                int vl = rp.vl;
+                TreeNode node = rp.node;
+
+                ans.set(vl, node.val);
+
+                if (node.left != null)
+                    que.addLast(new vPair(node.left, vl - 1));
+                if (node.right != null)
+                    que.addLast(new vPair(node.right, vl + 1));
+            }
+        }
+
+        return ans;
+    }
+
+    public static ArrayList<Integer> topView(TreeNode root) {
+        LinkedList<vPair> que = new LinkedList<>();
+        int[] minMax = new int[2];
+        widthOfShadow(root, 0, minMax);
+        int len = minMax[1] - minMax[0] + 1;
+
+        que.addLast(new vPair(root, Math.abs(minMax[0])));
+
+        ArrayList<Integer> ans = new ArrayList<>();
+        for (int i = 0; i < len; i++)
+            ans.add(null);
+
+        while (que.size() != 0) {
+            int size = que.size();
+            while (size-- > 0) {
+                vPair rp = que.removeFirst();
+                int vl = rp.vl;
+                TreeNode node = rp.node;
+
+                if (ans.get(vl) == null)
+                    ans.set(vl, node.val);
+
+                if (node.left != null)
+                    que.addLast(new vPair(node.left, vl - 1));
+                if (node.right != null)
+                    que.addLast(new vPair(node.right, vl + 1));
+            }
+        }
+
+        return ans;
+    }
+
+    public static ArrayList<ArrayList<Integer>> diagonalOrder(TreeNode root) {
+        LinkedList<TreeNode> que = new LinkedList<>();
+
+        ArrayList<ArrayList<Integer>> ans = new ArrayList<>();
+        que.addLast(root);
+
+        while (que.size() != 0) {
+            int size = que.size();
+            ArrayList<Integer> smallAns = new ArrayList<>();
+            while (size-- > 0) { // diagonal
+                TreeNode node = que.removeFirst();
+                while (node != null) { // clusters of diagonal
+                    smallAns.add(node.val);
+                    if (node.left != null)
+                        que.addLast(node.left);
+                    node = node.right;
+                }
+            }
+
+            ans.add(smallAns);
+        }
+
+        return ans;
+    }
+
+    public static ArrayList<ArrayList<Integer>> antiDiagonalOrder(TreeNode root) {
+        LinkedList<TreeNode> que = new LinkedList<>();
+
+        ArrayList<ArrayList<Integer>> ans = new ArrayList<>();
+        que.addLast(root);
+
+        while (que.size() != 0) {
+            int size = que.size();
+            ArrayList<Integer> smallAns = new ArrayList<>();
+            while (size-- > 0) { // diagonal
+                TreeNode node = que.removeFirst();
+                while (node != null) { // clusters of diagonal
+                    smallAns.add(node.val);
+                    if (node.right != null)
+                        que.addLast(node.right);
+                    node = node.left;
+                }
+            }
+
+            ans.add(smallAns);
+        }
+
+        return ans;
+    }
+
+    public static ArrayList<Integer> verticalOrderSum(TreeNode root) {
+        LinkedList<vPair> que = new LinkedList<>();
+        int[] minMax = new int[2];
+        widthOfShadow(root, 0, minMax);
+        int len = minMax[1] - minMax[0] + 1;
+
+        que.addLast(new vPair(root, Math.abs(minMax[0])));
+
+        ArrayList<Integer> ans = new ArrayList<>();
+        for (int i = 0; i < len; i++)
+            ans.add(null);
+
+        while (que.size() != 0) {
+            int size = que.size();
+            while (size-- > 0) {
+                vPair rp = que.removeFirst();
+                int vl = rp.vl;
+                TreeNode node = rp.node;
+
+                ans.set(vl, ans.get(vl) + node.val);
+
+                if (node.left != null)
+                    que.addLast(new vPair(node.left, vl - 1));
+                if (node.right != null)
+                    que.addLast(new vPair(node.right, vl + 1));
+            }
+        }
+
+        return ans;
+    }
+
+    public static ArrayList<Integer> diagonalOrderSum(TreeNode root) {
+        LinkedList<TreeNode> que = new LinkedList<>();
+
+        ArrayList<Integer> ans = new ArrayList<>();
+        que.addLast(root);
+
+        while (que.size() != 0) {
+            int size = que.size();
+            int sum = 0;
+            while (size-- > 0) { // diagonal
+                TreeNode node = que.removeFirst();
+                while (node != null) { // clusters of diagonal
+                    sum += node.val;
+                    if (node.left != null)
+                        que.addLast(node.left);
+                    node = node.right;
+                }
+            }
+
+            ans.add(sum);
+        }
+
+        return ans;
+    }
+
+    public static class ListNode {
+        int data = 0;
+        ListNode prev = null;
+        ListNode next = null;
+
+        ListNode(int data) {
+            this.data = data;
+        }
+    }
+
+    public static void verticalOrderSum(TreeNode root, ListNode node) {
+        node.data += root.val;
+        if (root.left != null) {
+            if (node.prev == null) {
+                ListNode nnode = new ListNode(0);
+                nnode.next = node;
+                node.prev = nnode;
+            }
+            verticalOrderSum(root.left, node.prev);
+        }
+
+        if (root.right != null) {
+            if (node.next == null) {
+                ListNode nnode = new ListNode(0);
+                nnode.prev = node;
+                node.next = nnode;
+            }
+            verticalOrderSum(root.right, node.next);
+        }
+    }
+
+    public static void verticalOrderSum(TreeNode node) {
+        ListNode curr = new ListNode(0);
+        verticalOrderSum(node, curr);
+    }
+
+    public static void diagonalOrderSum(TreeNode root, ListNode node) {
+        node.data += root.val;
+        if (root.left != null) {
+            if (node.prev == null) {
+                ListNode nnode = new ListNode(0);
+                nnode.next = node;
+                node.prev = nnode;
+            }
+            diagonalOrderSum(root.left, node.prev);
+        }
+
+        if (root.right != null) {
+            diagonalOrderSum(root.right, node);
+        }
+    }
+
+    public static void diagonalOrderSum(TreeNode node) {
+        ListNode curr = new ListNode(0);
+        diagonalOrderSum(node, curr);
+    }
+
+    // 987
+    public List<List<Integer>> verticalTraversal(TreeNode root) {
+        PriorityQueue<vPair> que = new PriorityQueue<>((a, b) -> {
+            if (a.vl != b.vl)
+                return a.vl - b.vl;
+
+            return a.node.val - b.node.val;
+        });
+
+        PriorityQueue<vPair> chilque = new PriorityQueue<>((a, b) -> {
+            if (a.vl != b.vl)
+                return a.vl - b.vl;
+
+            return a.node.val - b.node.val;
+        });
+
+        int[] minMax = new int[2];
+        widthOfShadow(root, 0, minMax);
+        int len = minMax[1] - minMax[0] + 1;
+
+        que.add(new vPair(root, Math.abs(minMax[0])));
+
+        List<List<Integer>> ans = new ArrayList<>();
+        for (int i = 0; i < len; i++)
+            ans.add(new ArrayList<>());
+
+        while (que.size() != 0) {
+            int size = que.size();
+            while (size-- > 0) {
+                vPair rp = que.remove();
+                int vl = rp.vl;
+                TreeNode node = rp.node;
+
+                ans.get(vl).add(node.val);
+
+                if (node.left != null)
+                    chilque.add(new vPair(node.left, vl - 1));
+                if (node.right != null)
+                    chilque.add(new vPair(node.right, vl + 1));
+            }
+
+            PriorityQueue<vPair> temp = que;
+            que = chilque;
+            chilque = temp;
+        }
+
+        return ans;
+    }
+
+    public List<List<Integer>> verticalTraversal_02(TreeNode root) {
+        PriorityQueue<vPair> que = new PriorityQueue<>((a, b) -> {
+            if (a.level != b.level) {
+                return a.level - b.level;
+            } else if (a.vl != b.vl)
+                return a.vl - b.vl;
+
+            return a.node.val - b.node.val;
+        });
+
+        int[] minMax = new int[2];
+        widthOfShadow(root, 0, minMax);
+        int len = minMax[1] - minMax[0] + 1;
+
+        que.add(new vPair(root, Math.abs(minMax[0]), 0));
+
+        List<List<Integer>> ans = new ArrayList<>();
+        for (int i = 0; i < len; i++)
+            ans.add(new ArrayList<>());
+
+        while (que.size() != 0) {
+            int size = que.size();
+            while (size-- > 0) {
+                vPair rp = que.remove();
+                int vl = rp.vl;
+                int level = rp.level;
+                TreeNode node = rp.node;
+
+                ans.get(vl).add(node.val);
+
+                if (node.left != null)
+                    que.add(new vPair(node.left, vl - 1, level + 1));
+                if (node.right != null)
+                    que.add(new vPair(node.right, vl + 1, level + 1));
+            }
+        }
+
+        return ans;
+    }
+
+    public static class allSoluPair {
+        TreeNode pred = null;
+        TreeNode succ = null;
+
+        int ceil = (int) 1e9;
+        int floor = -(int) 1e9;
+
+        TreeNode prev = null;
+    }
+
+    public static void allSolution(TreeNode node, int data, allSoluPair pair) {
+        if (node == null)
+            return;
+
+        if (node.val < data)
+            pair.floor = Math.max(pair.floor, node.val);
+
+        if (node.val > data)
+            pair.ceil = Math.min(pair.ceil, node.val);
+
+        allSolution(node.left, data, pair);
+
+        if (node.val == data)
+            pair.pred = pair.prev;
+
+        if (pair.prev != null && pair.prev.val == data)
+            pair.succ = node;
+
+        pair.prev = node;
+
+        allSolution(node.right, data, pair);
+    }
 }
